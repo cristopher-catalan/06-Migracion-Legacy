@@ -1,58 +1,53 @@
-# 06 — Laboratorio de modernización de aplicación legacy
+# 06 — Laboratorio de Modernización de Aplicación Legacy
 
-**Estado:** MVP local de laboratorio sintético implementado; no se asume ni modifica una aplicación legacy real.  
+**Estado:** Laboratorio interactivo de modernización y pruebas de caracterización implementado en .NET 10 y ASP.NET Core con interfaz para ingenieros de software, playground de paridad funcional y control de cambios reversibles.
 
-**Ejecución:** desde la raíz de Preparacion-7-Proyectos-Web-DotNet, ejecuta dotnet run --project .\06-Migracion-Legacy\MigracionLegacy.csproj y abre http://localhost:5106. Contraseña de demostración: Demo123!. La persistencia usa EF Core InMemory por defecto; los perfiles y roles están en /api/auth/demo-users.
+**Ejecución:**
+```bash
+dotnet run --project .\06-Migracion-Legacy\MigracionLegacy.csproj --urls http://localhost:5106
+```
+Contraseña de demostración: `Demo123!`. La persistencia usa EF Core InMemory por defecto; perfiles en `/api/auth/demo-users`.
 
-**Objetivo:** demostrar cómo analizar, mantener y modernizar un sistema C# empresarial con riesgo controlado y cambios verificables.
+---
 
-## Enfoque
+## 🎯 Objetivo y Filosofía
 
-El proyecto se desarrollará en dos etapas futuras:
+Demostrar cómo analizar, refactorizar y modernizar sistemas empresariales C# monolíticos o heredados minimizando el riesgo operativo mediante:
+1. **Pruebas de Caracterización:** Capturar el comportamiento real del sistema antes de tocar código.
+2. **Paridad Funcional Verificable:** Validar que el motor modernizado devuelve idénticos resultados ante los mismos datos de entrada.
+3. **Decisiones Reversibles:** Registrar cada cambio arquitectónico con su estrategia de rollback inmediato.
 
-1. Crear una aplicación de referencia pequeña que represente un sistema legado de solicitudes/órdenes, con reglas documentadas y pruebas de comportamiento.
-2. Modernizarla gradualmente hacia una aplicación soportada en .NET 10, ASP.NET Core MVC/Web API y SQL Server, manteniendo la compatibilidad funcional en cada paso.
+---
 
-La documentación deberá declarar qué partes son simuladas. No se presentará una migración real de un cliente o sistema ajeno.
+## 💻 Características del Panel Moderno
 
-## Alcance técnico
+- **Theme de Ingeniería de Software:** Interfaz tipo terminal/consola oscura con acentos cian `#38bdf8` y ámbar `#fbbf24`, métricas de cobertura y barra de progreso de modernización.
+- **Playground Interactivo de Caracterización:** Ejecución en tiempo real de suites de prueba (cálculo de totales, impuestos, validaciones de estado) con inspección de discrepancias y diff JSON.
+- **Registro de Cambios Arquitectónicos:** Modal para documentar intervenciones técnicas, riesgo (Bajo/Medio/Alto) y procedimiento de reversión.
+- **Catálogo de Solicitudes:** Búsqueda reactiva, filtros por estado (`BORRADOR`, `EN_REVISION`, `APROBADA`, `MIGRADA`) y visualización de payloads legados vs. modernos.
+- **Sistema de Notificaciones Toast:** Feedback dinámico sin recargar la página.
 
-- Inventariar dependencias, módulos, tablas, integraciones y riesgos.
-- Registrar el comportamiento actual mediante ejemplos de entrada/salida y pruebas de caracterización.
-- Separar responsabilidades por módulos: presentación, aplicación, dominio e infraestructura, manteniendo el tamaño razonable para un proyecto junior.
-- Migrar primero una función acotada, por ejemplo búsqueda y actualización de solicitudes.
-- Sustituir acceso a datos heredado por EF Core en el módulo migrado, manteniendo consultas parametrizadas.
-- Documentar decisiones, limitaciones, regresiones encontradas y reversión.
-- Comparar contrato/API y resultados antes/después.
+---
 
-## Entregables futuros
+## 🔌 Endpoints de la API
 
-- Diagrama de módulos y mapa de dependencias.
-- Inventario de riesgos y plan de secuencia.
-- Registro de decisiones técnicas.
-- Pruebas de caracterización y regresión.
-- Comparación de consultas/modelos y plan de migración de datos.
-- API y pantallas para el módulo migrado.
-- Guía de despliegue, reversión y soporte.
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/api/migration/status` | Resumen de avance de módulos, cobertura de pruebas y riesgos |
+| `POST` | `/api/migration/changes` | Registrar cambio de arquitectura con plan de reversión |
+| `POST` | `/api/characterization/run` | Ejecutar suite de pruebas de caracterización |
+| `GET` | `/api/characterization/suite` | Obtener casos de prueba de referencia configurados |
+| `GET` | `/api/requests` | Listar solicitudes heredadas y migradas |
+| `POST` | `/api/requests` | Crear nueva solicitud en formato de transición |
+| `GET` | `/api/requests/{id}` | Consultar detalle de solicitud |
+| `PUT` | `/api/requests/{id}` | Actualizar datos y estado de solicitud |
+| `GET` | `/api/legacy-mgmt/summary` | Estadísticas agregadas del pipeline de migración |
 
-## Páginas y endpoints posibles
+---
 
-La API implementada incluye GET/POST /api/requests, GET/PUT /api/requests/{id}, GET /api/migration/status, POST /api/migration/changes y POST /api/characterization/run. El panel demo permite ejecutar ejemplos de estas operaciones.
+## 🛡️ Reglas de Seguridad y Buenas Prácticas
 
-## Reglas de migración
-
-- No reemplazar todo de una vez: migrar un módulo vertical cada vez.
-- Mantener respaldo antes de cambiar el esquema y documentar cómo volver atrás.
-- Comparar datos y resultados con conteos y consultas conocidas.
-- No copiar secretos ni datos personales reales; usar datos sintéticos.
-- Mantener trazabilidad de cambios de esquema y de API.
-- No llamar “migración” a una reescritura sin evidencia de paridad funcional.
-
-## Criterios de aceptación
-
-Un revisor puede identificar el comportamiento anterior, ejecutar las pruebas de referencia, revisar el módulo migrado y comprobar que sus resultados coinciden para los casos definidos. La guía explica cómo desplegar el cambio, detectar fallos y revertirlo.
-
-## Implementación local actual
-
-MVP disponible: ASP.NET Core + EF Core, panel interactivo y endpoints JSON descritos en el README raíz. El almacenamiento predeterminado es InMemory; SQL Server es configurable. La especificación de este documento sirve como alcance ampliado y backlog.
-
+- **Vertical Slice Migration:** Nunca reescribir todo a la vez; modernizar un módulo vertical cada vez.
+- **Sin Paridad No Hay Pase:** No se aprueba un despliegue sin suite de caracterización en verde.
+- **Reversión Obligatoria:** Todo cambio en producción debe contar con script de deshecho probado.
+- **Protección de Datos:** Se utilizan datos sintéticos conformes a GDPR/regulación de privacidad.
